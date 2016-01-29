@@ -1,2 +1,7 @@
 before_build:
   - nuget restore
+
+artifacts:
+- path: bin\Debug\r53export.exe
+  name: r53export.exe
+  
