@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\App.cs" />
+    <Compile Include="Helpers\Route53.cs" />
     <Compile Include="Helpers\Cmd.cs" />
     <Compile Include="Helpers\Log.cs" />
     <Compile Include="Program.cs" />

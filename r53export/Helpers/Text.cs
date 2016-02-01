@@ -30,5 +30,15 @@ namespace Pingfu.Route53Export
                 .Replace("\\052", "*")
                 .Replace("\\100", "@");
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        internal static string StripUnwantedCharacters(this string data)
+        {
+            return data.Replace("\t", "");
+        }
     }
 }

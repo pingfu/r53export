@@ -58,6 +58,16 @@ namespace Pingfu.Route53Export
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="format"></param>
+        /// <param name="args"></param>
+        internal static void Write(string format, params object[] args)
+        {
+            Write(Console.ForegroundColor, String.Format(FormatProvider, format, args));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="color"></param>
         /// <param name="format"></param>
         /// <param name="args"></param>
@@ -75,15 +85,19 @@ namespace Pingfu.Route53Export
         /// </summary>
         /// <param name="format"></param>
         /// <param name="args"></param>
-        internal static void WriteLineFixed(string format, params object[] args)
+        internal static void WriteInPlace(string format, params object[] args)
         {
-            var currentPosition = Console.CursorTop;
+            // carriage return to start of current line
+            Console.Write("\r");
+            
+            // clear text on the current line
+            Console.Write(new string(' ', Console.WindowWidth -1));
 
-            Console.WriteLine(new string(' ', Console.BufferWidth));
-            Console.SetCursorPosition(0, currentPosition);
+            // carriage return to start of current line
+            Console.Write("\r");
 
-            Console.WriteLine(String.Format(FormatProvider, format, args));
-            Console.SetCursorPosition(0, currentPosition);
+            // write the text
+            Console.Write(String.Format(FormatProvider, format, args));
         }
     }
 }
