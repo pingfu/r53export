@@ -75,17 +75,28 @@ namespace Pingfu.Route53Export
                                 // no profile name supplied
                                 if (args.Length == 2)
                                 {
-                                    ExportRoute53Data(ProfileManager.ListProfileNames().First());
+                                    var profileName = ProfileManager.ListProfileNames().FirstOrDefault();
+
+                                    if (profileName != null)
+                                    {
+                                        ExportRoute53Data(profileName);
+                                    }
+                                    else
+                                    {
+                                        throw new Exception(string.Format("No profiles found."));
+                                    }
                                 }
 
                                 // invalid number of args
-                                if (args.Length != 3)
+                                if (args.Length > 2)
                                 {
-                                    Cmd.WriteLine(ConsoleColor.Red, "Invalid profile name supplied.");
-                                    App.Exit(-1);
-                                }
+                                    if (!ProfileManager.IsProfileKnown(args[2]))
+                                    {
+                                        throw new Exception(string.Format("Profile \"{0}\" not found.", args[2]));
+                                    }
 
-                                ExportRoute53Data(args[2]);
+                                    ExportRoute53Data(args[2]);
+                                }
 
                                 break;
                             }
@@ -100,10 +111,12 @@ namespace Pingfu.Route53Export
                 {
                     DisplayHelp();
                 }
+
+                App.Exit();
             }
             catch (Exception ex)
             {
-                Cmd.WriteLine(Cmd.Red, ex.Message);
+                Cmd.WriteLine(Cmd.Red, "{0}", ex.Message);
                 App.Exit(-1);
             }
         }
@@ -128,10 +141,20 @@ namespace Pingfu.Route53Export
             Cmd.Write(Cmd.White, "  Profile Name   : ");
             var profileName = Console.ReadLine();
 
-            ProfileManager.RegisterProfile(
-                profileName.StripUnwantedCharacters(), 
-                awsAccessKey.StripUnwantedCharacters(), 
-                awsSecretKey.StripUnwantedCharacters());
+            profileName = profileName.StripUnwantedCharacters();
+            awsAccessKey = awsAccessKey.StripUnwantedCharacters();
+            awsSecretKey = awsSecretKey.StripUnwantedCharacters();
+
+            if (string.IsNullOrWhiteSpace(profileName) ||
+                string.IsNullOrWhiteSpace(awsAccessKey) ||
+                string.IsNullOrWhiteSpace(awsSecretKey))
+            {
+                Cmd.WriteLine();
+                Cmd.WriteLine(ConsoleColor.Red, "  Error, zero-length input. Profile not created.");
+                App.Exit(-1);
+            }
+
+            ProfileManager.RegisterProfile(profileName, awsAccessKey, awsSecretKey);
         }
 
         /// <summary>
@@ -186,7 +209,7 @@ namespace Pingfu.Route53Export
             var directory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var accountsFile = Path.Combine(directory, "AWSToolkit\\RegisteredAccounts.json");
 
-            Cmd.WriteLine(Cmd.White, "  == Attempting to decrypt {0} for {1}\\{2} ==\n", accountsFile, Environment.UserDomainName.ToUpper(), Environment.UserName);
+            Cmd.WriteLine(Cmd.White, "  == Attempting to decrypt {0} as {1}\\{2} ==\n", accountsFile, Environment.UserDomainName.ToUpper(), Environment.UserName);
 
             if (File.Exists(accountsFile))
             {
